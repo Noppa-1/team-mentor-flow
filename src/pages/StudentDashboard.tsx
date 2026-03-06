@@ -1,48 +1,55 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, LogOut } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const StudentDashboard = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const [counts, setCounts] = useState({ pending: 0, approved: 0, rejected: 0 });
+
+  useEffect(() => {
+    if (!user?.email) return;
+    const fetchCounts = async () => {
+      const ref = collection(db, "internship_apps");
+      const q = query(ref, where("studentEmail", "==", user.email));
+      const snap = await getDocs(q);
+      const c = { pending: 0, approved: 0, rejected: 0 };
+      snap.docs.forEach((d) => {
+        const s = d.data().status as keyof typeof c;
+        if (c[s] !== undefined) c[s]++;
+      });
+      setCounts(c);
+    };
+    fetchCounts();
+  }, [user?.email]);
+
+  const stats = [
+    { label: "รอดำเนินการ", value: counts.pending, icon: Clock, color: "text-[hsl(var(--warning))]" },
+    { label: "อนุมัติแล้ว", value: counts.approved, icon: CheckCircle, color: "text-[hsl(var(--success))]" },
+    { label: "ปฏิเสธ", value: counts.rejected, icon: XCircle, color: "text-destructive" },
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-10 border-b border-border bg-card shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <GraduationCap className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-foreground">ระบบจัดการฝึกงาน</h1>
-              <p className="text-xs text-muted-foreground">แผงควบคุมนักศึกษา</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-muted-foreground sm:block">
-              {user?.displayName || user?.email}
-            </span>
-            <Button variant="outline" size="sm" onClick={logout} className="gap-2">
-              <LogOut className="h-4 w-4" />
-              ออกจากระบบ
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>ยินดีต้อนรับ {user?.displayName}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              หน้านี้สำหรับนักศึกษา — ฟีเจอร์เพิ่มเติมจะเปิดใช้งานเร็ว ๆ นี้
-            </p>
-          </CardContent>
-        </Card>
-      </main>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">สวัสดี, {user?.displayName}</h1>
+        <p className="text-muted-foreground">ยินดีต้อนรับสู่ระบบจัดการฝึกงาน</p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        {stats.map((s) => (
+          <Card key={s.label}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle>
+              <s.icon className={`h-5 w-5 ${s.color}`} />
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-foreground">{s.value}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };

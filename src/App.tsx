@@ -4,9 +4,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import AppLayout from "@/components/AppLayout";
 import LoginPage from "./pages/LoginPage";
 import AdvisorDashboard from "./pages/AdvisorDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
+import SubmitApplication from "./pages/SubmitApplication";
+import MyApplications from "./pages/MyApplications";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -33,15 +37,27 @@ const AppRoutes = () => {
   }
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          role === "advisor" ? <AdvisorDashboard /> : <StudentDashboard />
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <AppLayout>
+      <Routes>
+        {role === "student" && (
+          <>
+            <Route path="/" element={<StudentDashboard />} />
+            <Route path="/submit" element={<SubmitApplication />} />
+            <Route path="/my-applications" element={<MyApplications />} />
+          </>
+        )}
+        {role === "advisor" && (
+          <Route path="/" element={<AdvisorDashboard />} />
+        )}
+        {role === "admin" && (
+          <>
+            <Route path="/" element={<AdminDashboard />} />
+            <Route path="/all-applications" element={<AdminDashboard />} />
+          </>
+        )}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AppLayout>
   );
 };
 
