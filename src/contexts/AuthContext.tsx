@@ -3,7 +3,7 @@ import { User, signInWithPopup, signOut, onAuthStateChanged } from "firebase/aut
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { auth, db, googleProvider } from "@/lib/firebase";
 
-type UserRole = "advisor" | "student" | "unknown";
+export type UserRole = "admin" | "advisor" | "student" | "unknown";
 
 interface AuthContextType {
   user: User | null;
@@ -24,10 +24,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkRole = async (email: string): Promise<UserRole> => {
     try {
+      // Check admins/staff collection first
+      const staffRef = collection(db, "staff");
+      const staffQ = query(staffRef, where("email", "==", email));
+      const staffSnap = await getDocs(staffQ);
+      if (!staffSnap.empty) return "admin";
+
+      // Check advisors collection
       const advisorsRef = collection(db, "advisors");
-      const q = query(advisorsRef, where("email", "==", email));
-      const snapshot = await getDocs(q);
-      if (!snapshot.empty) return "advisor";
+      const advQ = query(advisorsRef, where("email", "==", email));
+      const advSnap = await getDocs(advQ);
+      if (!advSnap.empty) return "advisor";
+
       return "student";
     } catch {
       return "unknown";
