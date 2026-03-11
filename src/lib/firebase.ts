@@ -3,12 +3,12 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB40HZGCJzO2vSerjRwKtPGg_5bAv9PU8Q",
+  apiKey: "AIzaSyB40HZGCJz02vSerjRwKtPGg_...",
   authDomain: "internship-app-1cabe.firebaseapp.com",
   projectId: "internship-app-1cabe",
-  storageBucket: "internship-app-1cabe.firebasestorage.app",
+  storageBucket: "internship-app-1cabe.appspot.com",
   messagingSenderId: "583836640777",
-  appId: "1:583836640777:web:571ba3d4d1df812dd33ad8",
+  appId: "1:583836640777:web:571ba3d4d1df8...",
   measurementId: "G-BKRN05M607",
 };
 
