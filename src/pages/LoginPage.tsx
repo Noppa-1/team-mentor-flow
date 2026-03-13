@@ -38,11 +38,23 @@ const LoginPage = () => {
       }
       setLoading(true);
       try {
-        // TODO: Save to Google Sheets once connected
+        const response = await fetch(
+          "https://script.google.com/macros/s/AKfycbygeVqi60zn8gWeSAhRXp0ZUIc76fmQeZywvrBtmHtrh7LJk3ZKDBFoIdh-fOlMVXjNCA/exec",
+          {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, studentId, email, password }),
+          }
+        );
         toast({ title: "สมัครสมาชิกสำเร็จ!", description: "กรุณาเข้าสู่ระบบ" });
         setIsSignUp(false);
+        setName("");
+        setStudentId("");
+        setEmail("");
+        setPassword("");
       } catch {
-        toast({ title: "เกิดข้อผิดพลาด", variant: "destructive" });
+        toast({ title: "เกิดข้อผิดพลาด กรุณาลองใหม่", variant: "destructive" });
       } finally {
         setLoading(false);
       }
