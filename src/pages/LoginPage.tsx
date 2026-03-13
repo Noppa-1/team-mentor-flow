@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { GraduationCap, User, Hash, Mail, Lock, Eye, EyeOff, Phone } from "lucide-react";
+import { GraduationCap, Hash, Mail, Lock, Eye, EyeOff, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 
 const SIGNUP_URL =
-  "https://script.google.com/macros/s/AKfycbyvrog1HOPr2UfzTbZgMqErRzpM3rrh0jIoAmgDwAmU6MLToeYETR3JnD-KGEntP-Bh9A/exec";
+  "https://script.google.com/macros/s/AKfycbvrog1HOPR2UfzTbZgMqErrzpM3rrh0jloAmgDwAmU6MLToeYETR3JnD-KGentP-Bh9A/exec";
+
+const EMAIL_DOMAIN = "@g.swu.ac.th";
 
 function isInIframe(): boolean {
   try {
@@ -44,7 +46,6 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Sign-up fields
   const [role, setRole] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [nameTitle, setNameTitle] = useState("");
@@ -57,7 +58,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
 
-  const idLabel = role === "student" ? "รหัสนักศึกษา (Student ID)" : "รหัสบุคลากร (Staff ID)";
+  const isStudent = role === "student";
 
   const clearForm = () => {
     setRole(""); setIdNumber(""); setNameTitle(""); setNameTitleEn("");
@@ -65,14 +66,30 @@ const LoginPage = () => {
     setEmail(""); setPassword(""); setPhone("");
   };
 
+  const validateEmail = (v: string) => v.endsWith(EMAIL_DOMAIN);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isSignUp) {
-      if (!role || !idNumber || !nameTitle || !nameTitleEn || !firstName || !lastName || !firstNameEn || !lastNameEn || !email || !password || !phone) {
+      // Common required fields
+      if (!role || !nameTitle || !nameTitleEn || !firstName || !lastName || !firstNameEn || !lastNameEn || !email || !password || !phone) {
         toast({ title: "กรุณากรอกข้อมูลให้ครบถ้วน", variant: "destructive" });
         return;
       }
+      if (isStudent && !idNumber) {
+        toast({ title: "กรุณากรอกรหัสนักศึกษา", variant: "destructive" });
+        return;
+      }
+      if (!validateEmail(email)) {
+        toast({ title: `กรุณาใช้อีเมล ${EMAIL_DOMAIN} เท่านั้น`, variant: "destructive" });
+        return;
+      }
+      if (password.length < 6) {
+        toast({ title: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร", variant: "destructive" });
+        return;
+      }
+
       setLoading(true);
       try {
         await fetch(SIGNUP_URL, {
@@ -80,7 +97,7 @@ const LoginPage = () => {
           mode: "no-cors",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            id_number: idNumber,
+            id_number: isStudent ? idNumber : "",
             name_title: nameTitle,
             name_title_en: nameTitleEn,
             first_name: firstName,
@@ -104,6 +121,10 @@ const LoginPage = () => {
     } else {
       if (!email || !password) {
         toast({ title: "กรุณากรอกอีเมลและรหัสผ่าน", variant: "destructive" });
+        return;
+      }
+      if (!validateEmail(email)) {
+        toast({ title: `กรุณาใช้อีเมล ${EMAIL_DOMAIN} เท่านั้น`, variant: "destructive" });
         return;
       }
       setLoading(true);
@@ -160,7 +181,7 @@ const LoginPage = () => {
                 {/* Role */}
                 <div className="space-y-1">
                   <Label className="text-xs font-medium text-foreground">บทบาท (Role)</Label>
-                  <Select value={role} onValueChange={setRole}>
+                  <Select value={role} onValueChange={(v) => { setRole(v); if (v !== "student") setIdNumber(""); }}>
                     <SelectTrigger><SelectValue placeholder="เลือกบทบาท" /></SelectTrigger>
                     <SelectContent>
                       {ROLES.map((r) => (
@@ -170,14 +191,16 @@ const LoginPage = () => {
                   </Select>
                 </div>
 
-                {/* ID Number */}
-                <div className="space-y-1">
-                  <Label className="text-xs font-medium text-foreground">{idLabel}</Label>
-                  <div className="relative">
-                    <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder={role === "student" ? "กรอกรหัสนักศึกษา" : "กรอกรหัสบุคลากร"} value={idNumber} onChange={(e) => setIdNumber(e.target.value)} className="pl-10" />
+                {/* Student ID — only for students */}
+                {isStudent && (
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium text-foreground">รหัสนักศึกษา (Student ID) *</Label>
+                    <div className="relative">
+                      <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input placeholder="กรอกรหัสนักศึกษา" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} className="pl-10" />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Thai Title + Name */}
                 <div className="grid grid-cols-3 gap-2">
@@ -234,10 +257,10 @@ const LoginPage = () => {
 
             {/* Email */}
             <div className="space-y-1">
-              <Label className="text-xs font-medium text-foreground">อีเมล (Email)</Label>
+              <Label className="text-xs font-medium text-foreground">อีเมล (Email — @g.swu.ac.th เท่านั้น)</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input type="email" placeholder="กรอกอีเมล" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" />
+                <Input type="email" placeholder="username@g.swu.ac.th" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" />
               </div>
             </div>
 
@@ -246,7 +269,7 @@ const LoginPage = () => {
               <Label className="text-xs font-medium text-foreground">รหัสผ่าน (Password)</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input type={showPassword ? "text" : "password"} placeholder="กรอกรหัสผ่าน" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" />
+                <Input type={showPassword ? "text" : "password"} placeholder="อย่างน้อย 6 ตัวอักษร" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
