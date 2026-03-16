@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 
 const SIGNUP_URL =
-  "https://script.google.com/macros/s/AKfycbvrog1HOPR2UfzTbZgMqErrzpM3rrh0jloAmgDwAmU6MLToeYETR3JnD-KGentP-Bh9A/exec";
+  "https://script.google.com/macros/s/AKfycbyvrog1HOPr2UfzTbZgMqErRzpM3rrh0jIoAmgDwAmU6MLToeYETR3JnD-KGEntP-Bh9A/exec";
 
 const EMAIL_DOMAIN = "@g.swu.ac.th";
 
