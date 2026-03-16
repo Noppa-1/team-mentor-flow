@@ -1,57 +1,313 @@
-import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  User,
+  Mail,
+  Phone,
+  Hash,
+  Building2,
+  MapPin,
+  CalendarDays,
+  FileText,
+  ClipboardCheck,
+  BookOpen,
+  ArrowRight,
+  Briefcase,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  UserCircle,
+} from "lucide-react";
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbyvrog1HOPr2UfzTbZgMqErRzpM3rrh0jIoAmgDwAmU6MLToeYETR3JnD-KGEntP-Bh9A/exec";
+
+interface UserData {
+  id_number: string;
+  name_title: string;
+  first_name: string;
+  last_name: string;
+  name_title_en: string;
+  first_name_en: string;
+  last_name_en: string;
+  email: string;
+  phone: string;
+  role: string;
+}
+
+interface InternshipData {
+  company_name?: string;
+  company_address?: string;
+  contact_person?: string;
+  start_date?: string;
+  end_date?: string;
+}
+
+interface DocumentStatus {
+  name: string;
+  status: "submitted" | "pending" | "not_submitted";
+}
 
 const StudentDashboard = () => {
-  const { user } = useAuth();
-  const [counts, setCounts] = useState({ pending: 0, approved: 0, rejected: 0 });
+  const navigate = useNavigate();
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [internship, setInternship] = useState<InternshipData | null>(null);
+  const [documents, setDocuments] = useState<DocumentStatus[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.email) return;
-    const fetchCounts = async () => {
-      const ref = collection(db, "internship_apps");
-      const q = query(ref, where("studentEmail", "==", user.email));
-      const snap = await getDocs(q);
-      const c = { pending: 0, approved: 0, rejected: 0 };
-      snap.docs.forEach((d) => {
-        const s = d.data().status as keyof typeof c;
-        if (c[s] !== undefined) c[s]++;
-      });
-      setCounts(c);
-    };
-    fetchCounts();
-  }, [user?.email]);
+    const stored = localStorage.getItem("user");
+    if (!stored) {
+      navigate("/login");
+      return;
+    }
 
-  const stats = [
-    { label: "รอดำเนินการ", value: counts.pending, icon: Clock, color: "text-[hsl(var(--warning))]" },
-    { label: "อนุมัติแล้ว", value: counts.approved, icon: CheckCircle, color: "text-[hsl(var(--success))]" },
-    { label: "ปฏิเสธ", value: counts.rejected, icon: XCircle, color: "text-destructive" },
-  ];
+    try {
+      const parsed = JSON.parse(stored);
+      // Map from login response to UserData
+      const user: UserData = {
+        id_number: parsed.id_number || parsed.studentId || "",
+        name_title: parsed.name_title || "",
+        first_name: parsed.first_name || "",
+        last_name: parsed.last_name || "",
+        name_title_en: parsed.name_title_en || "",
+        first_name_en: parsed.first_name_en || "",
+        last_name_en: parsed.last_name_en || "",
+        email: parsed.email || "",
+        phone: parsed.phone || "",
+        role: parsed.role || "student",
+      };
+      setUserData(user);
+
+      // Internship placeholder (will be fetched when sheet is ready)
+      setInternship({
+        company_name: parsed.company_name || "",
+        company_address: parsed.company_address || "",
+        contact_person: parsed.contact_person || "",
+        start_date: parsed.start_date || "",
+        end_date: parsed.end_date || "",
+      });
+
+      // Document status placeholders
+      setDocuments([
+        { name: "ใบสมัครฝึกงาน", status: parsed.doc_application || "not_submitted" },
+        { name: "ใบนิเทศการฝึกงาน", status: parsed.doc_supervision || "not_submitted" },
+        { name: "รายงานการฝึกงาน", status: parsed.doc_report || "not_submitted" },
+        { name: "แบบประเมินผล", status: parsed.doc_evaluation || "not_submitted" },
+      ]);
+    } catch {
+      navigate("/login");
+      return;
+    }
+    setLoading(false);
+  }, [navigate]);
+
+  if (loading || !userData) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <span className="text-muted-foreground">กำลังโหลดข้อมูล...</span>
+        </div>
+      </div>
+    );
+  }
+
+  const fullNameTh = `${userData.name_title}${userData.first_name} ${userData.last_name}`;
+  const fullNameEn = `${userData.name_title_en} ${userData.first_name_en} ${userData.last_name_en}`;
+  const hasInternship = !!(internship?.company_name);
+
+  const docStatusConfig = {
+    submitted: { label: "ส่งแล้ว", icon: CheckCircle2, className: "bg-success/10 text-success border-success/20" },
+    pending: { label: "รอตรวจ", icon: Clock, className: "bg-warning/10 text-warning border-warning/20" },
+    not_submitted: { label: "ยังไม่ส่ง", icon: AlertCircle, className: "bg-muted text-muted-foreground border-border" },
+  };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">สวัสดี, {user?.displayName}</h1>
-        <p className="text-muted-foreground">ยินดีต้อนรับสู่ระบบจัดการฝึกงาน</p>
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Welcome Banner */}
+      <div className="rounded-xl bg-primary p-6 text-primary-foreground">
+        <div className="flex items-start gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary-foreground/20">
+            <UserCircle className="h-8 w-8" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold">สวัสดี, {userData.first_name}!</h1>
+            <p className="mt-1 text-sm text-primary-foreground/80">
+              ยินดีต้อนรับสู่ระบบจัดการฝึกงาน — Internship Management System
+            </p>
+            <Badge className="mt-2 bg-primary-foreground/20 text-primary-foreground border-none text-xs">
+              นักศึกษา (Student)
+            </Badge>
+          </div>
+        </div>
       </div>
+
+      {/* Student Info Card */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <User className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">ข้อมูลนักศึกษา</CardTitle>
+          </div>
+          <CardDescription>ข้อมูลส่วนตัวจากระบบ</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <InfoRow icon={User} label="ชื่อ-นามสกุล (ไทย)" value={fullNameTh} />
+            <InfoRow icon={User} label="Full Name (EN)" value={fullNameEn} />
+            <InfoRow icon={Hash} label="รหัสนักศึกษา" value={userData.id_number || "—"} />
+            <InfoRow icon={Mail} label="อีเมล" value={userData.email} />
+            <InfoRow icon={Phone} label="เบอร์โทรศัพท์" value={userData.phone || "—"} />
+            <InfoRow icon={Briefcase} label="บทบาท" value="นักศึกษา (Student)" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Status Cards Row */}
       <div className="grid gap-4 sm:grid-cols-3">
-        {stats.map((s) => (
-          <Card key={s.label}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle>
-              <s.icon className={`h-5 w-5 ${s.color}`} />
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-foreground">{s.value}</p>
-            </CardContent>
-          </Card>
-        ))}
+        {/* Company Info */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" />
+              <CardTitle className="text-base">สถานที่ฝึกงาน</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {hasInternship ? (
+              <>
+                <div>
+                  <span className="text-muted-foreground">บริษัท: </span>
+                  <span className="font-medium text-foreground">{internship!.company_name}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">ที่อยู่: </span>
+                  <span className="text-foreground">{internship!.company_address || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">ผู้ประสานงาน: </span>
+                  <span className="text-foreground">{internship!.contact_person || "—"}</span>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center py-4 text-center">
+                <MapPin className="h-8 w-8 text-muted-foreground/40 mb-2" />
+                <p className="text-muted-foreground text-xs">ยังไม่มีข้อมูลสถานที่ฝึกงาน</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Internship Period */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5 text-primary" />
+              <CardTitle className="text-base">ระยะเวลาฝึกงาน</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {internship?.start_date ? (
+              <>
+                <div>
+                  <span className="text-muted-foreground">เริ่ม: </span>
+                  <span className="font-medium text-foreground">{internship.start_date}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">สิ้นสุด: </span>
+                  <span className="font-medium text-foreground">{internship.end_date || "—"}</span>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center py-4 text-center">
+                <CalendarDays className="h-8 w-8 text-muted-foreground/40 mb-2" />
+                <p className="text-muted-foreground text-xs">ยังไม่ได้กำหนดระยะเวลา</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Document Status */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <CardTitle className="text-base">สถานะเอกสาร</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {documents.map((doc) => {
+              const cfg = docStatusConfig[doc.status];
+              const Icon = cfg.icon;
+              return (
+                <div key={doc.name} className="flex items-center justify-between text-sm">
+                  <span className="text-foreground">{doc.name}</span>
+                  <Badge variant="outline" className={`text-xs ${cfg.className}`}>
+                    <Icon className="mr-1 h-3 w-3" />
+                    {cfg.label}
+                  </Badge>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">ดำเนินการด่วน</CardTitle>
+          <CardDescription>ส่งเอกสารหรือจัดการข้อมูลฝึกงาน</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Button
+              variant="outline"
+              className="h-auto flex-col gap-2 py-4 hover:bg-accent"
+              onClick={() => navigate("/submit")}
+            >
+              <ClipboardCheck className="h-6 w-6 text-primary" />
+              <span className="text-sm font-medium">ส่งคำร้องฝึกงาน</span>
+              <span className="text-xs text-muted-foreground">ยื่นใบสมัครฝึกงาน</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto flex-col gap-2 py-4 hover:bg-accent"
+              onClick={() => navigate("/my-applications")}
+            >
+              <BookOpen className="h-6 w-6 text-primary" />
+              <span className="text-sm font-medium">คำร้องของฉัน</span>
+              <span className="text-xs text-muted-foreground">ดูสถานะคำร้องทั้งหมด</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto flex-col gap-2 py-4 hover:bg-accent"
+              onClick={() => navigate("/documents")}
+            >
+              <FileText className="h-6 w-6 text-primary" />
+              <span className="text-sm font-medium">เอกสารฝึกงาน</span>
+              <span className="text-xs text-muted-foreground">อัพโหลดและติดตามเอกสาร</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
+
+const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) => (
+  <div className="flex items-start gap-3">
+    <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-sm font-medium text-foreground">{value}</p>
+    </div>
+  </div>
+);
 
 export default StudentDashboard;
