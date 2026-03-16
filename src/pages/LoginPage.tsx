@@ -129,9 +129,22 @@ const LoginPage = () => {
       }
       setLoading(true);
       try {
-        toast({ title: "กำลังเข้าสู่ระบบ..." });
+        const res = await fetch(SIGNUP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({ action: "login", email, password }),
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+          toast({ title: "เข้าสู่ระบบสำเร็จ!" });
+          // Store user info and redirect
+          localStorage.setItem("user", JSON.stringify(data));
+          window.location.href = "/";
+        } else {
+          toast({ title: data.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง", variant: "destructive" });
+        }
       } catch {
-        toast({ title: "เกิดข้อผิดพลาด", variant: "destructive" });
+        toast({ title: "เกิดข้อผิดพลาด กรุณาลองใหม่", variant: "destructive" });
       } finally {
         setLoading(false);
       }
