@@ -205,6 +205,11 @@ const StudentDashboard = () => {
             <InfoRow icon={Hash} label="รหัสนักศึกษา" value={userData.id_number || "—"} />
             <InfoRow icon={Mail} label="อีเมล" value={userData.email} />
             <InfoRow icon={Phone} label="เบอร์โทรศัพท์" value={userData.phone || "—"} />
+            <InfoRow icon={GraduationCap} label="สาขาวิชา" value={userData.major || "—"} />
+            <InfoRow icon={BookMarked} label="หลักสูตร" value={userData.curriculum || "—"} />
+            <InfoRow icon={User} label="อาจารย์ที่ปรึกษา" value={userData.advisor || "—"} />
+            <InfoRow icon={CalendarDays} label="ภาคเรียน" value={userData.term || "—"} />
+            <InfoRow icon={CalendarDays} label="ปีการศึกษา" value={userData.academic_year || "—"} />
             <InfoRow icon={Briefcase} label="บทบาท" value="นักศึกษา (Student)" />
           </div>
         </CardContent>
