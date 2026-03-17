@@ -26,6 +26,21 @@ import {
 const API_URL =
   "https://script.google.com/macros/s/AKfycbyvrog1HOPr2UfzTbZgMqErRzpM3rrh0jIoAmgDwAmU6MLToeYETR3JnD-KGEntP-Bh9A/exec";
 
+const fetchUserProfile = async (email: string): Promise<UserData | null> => {
+  try {
+    const res = await fetch(`${API_URL}?action=getProfile&email=${encodeURIComponent(email)}`);
+    const data = await res.json();
+    if (data.status === "success") {
+      const profile = data.user || data.data || data;
+      localStorage.setItem("user", JSON.stringify(profile));
+      return profile as UserData;
+    }
+  } catch (err) {
+    console.error("Failed to fetch profile:", err);
+  }
+  return null;
+};
+
 interface UserData {
   id_number: string;
   name_title: string;
@@ -66,44 +81,59 @@ const StudentDashboard = () => {
       return;
     }
 
-    try {
-      const parsed = JSON.parse(stored);
-      // Map from login response to UserData
-      const user: UserData = {
-        id_number: parsed.id_number || parsed.studentId || "",
-        name_title: parsed.name_title || "",
-        first_name: parsed.first_name || "",
-        last_name: parsed.last_name || "",
-        name_title_en: parsed.name_title_en || "",
-        first_name_en: parsed.first_name_en || "",
-        last_name_en: parsed.last_name_en || "",
-        email: parsed.email || "",
-        phone: parsed.phone || "",
-        role: parsed.role || "student",
-      };
-      setUserData(user);
+    const loadUser = async () => {
+      try {
+        const parsed = JSON.parse(stored);
+        // Map from login response to UserData
+        const user: UserData = {
+          id_number: parsed.id_number || parsed.studentId || "",
+          name_title: parsed.name_title || "",
+          first_name: parsed.first_name || "",
+          last_name: parsed.last_name || "",
+          name_title_en: parsed.name_title_en || "",
+          first_name_en: parsed.first_name_en || "",
+          last_name_en: parsed.last_name_en || "",
+          email: parsed.email || "",
+          phone: parsed.phone || "",
+          role: parsed.role || "student",
+        };
 
-      // Internship placeholder (will be fetched when sheet is ready)
-      setInternship({
-        company_name: parsed.company_name || "",
-        company_address: parsed.company_address || "",
-        contact_person: parsed.contact_person || "",
-        start_date: parsed.start_date || "",
-        end_date: parsed.end_date || "",
-      });
+        // If key fields are missing, fetch full profile from API
+        if (!user.first_name && user.email) {
+          const fetched = await fetchUserProfile(user.email);
+          if (fetched) {
+            setUserData(fetched);
+            setLoading(false);
+            return;
+          }
+        }
 
-      // Document status placeholders
-      setDocuments([
-        { name: "ใบสมัครฝึกงาน", status: parsed.doc_application || "not_submitted" },
-        { name: "ใบนิเทศการฝึกงาน", status: parsed.doc_supervision || "not_submitted" },
-        { name: "รายงานการฝึกงาน", status: parsed.doc_report || "not_submitted" },
-        { name: "แบบประเมินผล", status: parsed.doc_evaluation || "not_submitted" },
-      ]);
-    } catch {
-      navigate("/login");
-      return;
-    }
-    setLoading(false);
+        setUserData(user);
+
+        // Internship data
+        setInternship({
+          company_name: parsed.company_name || "",
+          company_address: parsed.company_address || "",
+          contact_person: parsed.contact_person || "",
+          start_date: parsed.start_date || "",
+          end_date: parsed.end_date || "",
+        });
+
+        // Document status
+        setDocuments([
+          { name: "ใบสมัครฝึกงาน", status: parsed.doc_application || "not_submitted" },
+          { name: "ใบนิเทศการฝึกงาน", status: parsed.doc_supervision || "not_submitted" },
+          { name: "รายงานการฝึกงาน", status: parsed.doc_report || "not_submitted" },
+          { name: "แบบประเมินผล", status: parsed.doc_evaluation || "not_submitted" },
+        ]);
+      } catch {
+        navigate("/login");
+        return;
+      }
+      setLoading(false);
+    };
+
+    loadUser();
   }, [navigate]);
 
   if (loading || !userData) {

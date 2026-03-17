@@ -137,8 +137,9 @@ const LoginPage = () => {
         const data = await res.json();
         if (data.status === "success") {
           toast({ title: "เข้าสู่ระบบสำเร็จ!" });
-          // Store user info and redirect
-          localStorage.setItem("user", JSON.stringify(data));
+          // Store user profile from response (handle nested or flat structure)
+          const userProfile = data.user || data.data || data;
+          localStorage.setItem("user", JSON.stringify(userProfile));
           window.location.href = "/";
         } else {
           toast({ title: data.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง", variant: "destructive" });
