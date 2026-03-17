@@ -55,7 +55,9 @@ interface UserData {
   phone: string;
   role: string;
   major?: string;
+  major_en?: string;
   curriculum?: string;
+  curriculum_en?: string;
   advisor?: string;
   term?: string;
   academic_year?: string;
@@ -104,7 +106,9 @@ const StudentDashboard = () => {
           phone: parsed.phone || "",
           role: parsed.role || "student",
           major: parsed.major || "",
+          major_en: parsed.major_en || "",
           curriculum: parsed.curriculum || "",
+          curriculum_en: parsed.curriculum_en || "",
           advisor: parsed.advisor || "",
           term: parsed.term || "",
           academic_year: parsed.academic_year || "",
