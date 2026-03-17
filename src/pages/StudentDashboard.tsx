@@ -101,6 +101,11 @@ const StudentDashboard = () => {
           email: parsed.email || "",
           phone: parsed.phone || "",
           role: parsed.role || "student",
+          major: parsed.major || "",
+          curriculum: parsed.curriculum || "",
+          advisor: parsed.advisor || "",
+          term: parsed.term || "",
+          academic_year: parsed.academic_year || "",
         };
 
         // If key fields are missing, fetch full profile from API
