@@ -26,6 +26,21 @@ import {
 const API_URL =
   "https://script.google.com/macros/s/AKfycbyvrog1HOPr2UfzTbZgMqErRzpM3rrh0jIoAmgDwAmU6MLToeYETR3JnD-KGEntP-Bh9A/exec";
 
+const fetchUserProfile = async (email: string): Promise<UserData | null> => {
+  try {
+    const res = await fetch(`${API_URL}?action=getProfile&email=${encodeURIComponent(email)}`);
+    const data = await res.json();
+    if (data.status === "success") {
+      const profile = data.user || data.data || data;
+      localStorage.setItem("user", JSON.stringify(profile));
+      return profile as UserData;
+    }
+  } catch (err) {
+    console.error("Failed to fetch profile:", err);
+  }
+  return null;
+};
+
 interface UserData {
   id_number: string;
   name_title: string;
