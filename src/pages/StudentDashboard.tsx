@@ -21,6 +21,8 @@ import {
   CheckCircle2,
   AlertCircle,
   UserCircle,
+  GraduationCap,
+  BookMarked,
 } from "lucide-react";
 
 const API_URL =
