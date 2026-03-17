@@ -52,6 +52,11 @@ interface UserData {
   email: string;
   phone: string;
   role: string;
+  major?: string;
+  curriculum?: string;
+  advisor?: string;
+  term?: string;
+  academic_year?: string;
 }
 
 interface InternshipData {
