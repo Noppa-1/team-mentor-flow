@@ -55,7 +55,9 @@ interface UserData {
   phone: string;
   role: string;
   major?: string;
+  major_en?: string;
   curriculum?: string;
+  curriculum_en?: string;
   advisor?: string;
   term?: string;
   academic_year?: string;
