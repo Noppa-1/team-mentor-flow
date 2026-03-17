@@ -21,6 +21,8 @@ import {
   CheckCircle2,
   AlertCircle,
   UserCircle,
+  GraduationCap,
+  BookMarked,
 } from "lucide-react";
 
 const API_URL =
@@ -52,6 +54,11 @@ interface UserData {
   email: string;
   phone: string;
   role: string;
+  major?: string;
+  curriculum?: string;
+  advisor?: string;
+  term?: string;
+  academic_year?: string;
 }
 
 interface InternshipData {
@@ -96,6 +103,11 @@ const StudentDashboard = () => {
           email: parsed.email || "",
           phone: parsed.phone || "",
           role: parsed.role || "student",
+          major: parsed.major || "",
+          curriculum: parsed.curriculum || "",
+          advisor: parsed.advisor || "",
+          term: parsed.term || "",
+          academic_year: parsed.academic_year || "",
         };
 
         // If key fields are missing, fetch full profile from API
@@ -193,6 +205,11 @@ const StudentDashboard = () => {
             <InfoRow icon={Hash} label="รหัสนักศึกษา" value={userData.id_number || "—"} />
             <InfoRow icon={Mail} label="อีเมล" value={userData.email} />
             <InfoRow icon={Phone} label="เบอร์โทรศัพท์" value={userData.phone || "—"} />
+            <InfoRow icon={GraduationCap} label="สาขาวิชา" value={userData.major || "—"} />
+            <InfoRow icon={BookMarked} label="หลักสูตร" value={userData.curriculum || "—"} />
+            <InfoRow icon={User} label="อาจารย์ที่ปรึกษา" value={userData.advisor || "—"} />
+            <InfoRow icon={CalendarDays} label="ภาคเรียน" value={userData.term || "—"} />
+            <InfoRow icon={CalendarDays} label="ปีการศึกษา" value={userData.academic_year || "—"} />
             <InfoRow icon={Briefcase} label="บทบาท" value="นักศึกษา (Student)" />
           </div>
         </CardContent>
