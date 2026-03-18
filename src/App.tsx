@@ -55,6 +55,7 @@ const AppRoutes = () => {
             <InternshipInsights />
           </ProtectedRoute>
         }
+      />
       <Route
         path="/profile"
         element={
