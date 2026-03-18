@@ -14,10 +14,11 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { GraduationCap, LogOut, FileText, PlusCircle, LayoutDashboard, UserCircle, FolderOpen } from "lucide-react";
+import { GraduationCap, LogOut, FileText, PlusCircle, LayoutDashboard, UserCircle, FolderOpen, BarChart3 } from "lucide-react";
 
 const studentMenu = [
   { title: "แดชบอร์ด", url: "/", icon: LayoutDashboard },
+  { title: "สถิติฝึกงาน", url: "/insights", icon: BarChart3 },
   { title: "ข้อมูลส่วนตัว", url: "/profile", icon: UserCircle },
   { title: "ส่งคำร้องฝึกงาน", url: "/submit", icon: PlusCircle },
   { title: "คำร้องของฉัน", url: "/my-applications", icon: FileText },

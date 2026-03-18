@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import StudentDashboard from "./pages/StudentDashboard";
 import SubmitApplication from "./pages/SubmitApplication";
 import MyApplications from "./pages/MyApplications";
+import InternshipInsights from "./pages/InternshipInsights";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
