@@ -49,6 +49,13 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/insights"
+        element={
+          <ProtectedRoute>
+            <InternshipInsights />
+          </ProtectedRoute>
+        }
+      <Route
         path="/profile"
         element={
           <ProtectedRoute>
