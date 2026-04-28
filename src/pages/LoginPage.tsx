@@ -11,14 +11,6 @@ const SIGNUP_URL =
 
 const EMAIL_DOMAIN = "@g.swu.ac.th";
 
-function isInIframe(): boolean {
-  try {
-    return window.self !== window.top;
-  } catch {
-    return true;
-  }
-}
-
 const THAI_TITLES = ["นาย", "นาง", "นางสาว", "ผศ.", "รศ.", "ศ."];
 const EN_TITLES = ["Mr.", "Mrs.", "Ms.", "Asst.Prof.", "Assoc.Prof.", "Prof."];
 const ROLES = [
