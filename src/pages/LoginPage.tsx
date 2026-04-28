@@ -275,7 +275,7 @@ const LoginPage = () => {
                     onClick={() => toast({ title: "กรุณาติดต่อเจ้าหน้าที่เพื่อรีเซ็ตรหัสผ่าน" })}
                     className="text-xs font-medium text-primary hover:underline"
                   >
-                    ลืมรหัสผ่าน?
+                    ลืมรหัสผ่าน? (Forgot Password?)
                   </button>
                 </div>
               )}
