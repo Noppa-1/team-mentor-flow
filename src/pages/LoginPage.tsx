@@ -268,6 +268,17 @@ const LoginPage = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {!isSignUp && (
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => toast({ title: "กรุณาติดต่อเจ้าหน้าที่เพื่อรีเซ็ตรหัสผ่าน" })}
+                    className="text-xs font-medium text-primary hover:underline"
+                  >
+                    ลืมรหัสผ่าน?
+                  </button>
+                </div>
+              )}
             </div>
 
             <Button type="submit" disabled={loading} className="w-full h-11 text-sm font-semibold">
