@@ -174,14 +174,14 @@ const LoginPage = () => {
             <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-primary-foreground/20">
               <GraduationCap className="h-7 w-7 text-primary-foreground" />
             </div>
-            <h1 className="text-lg font-bold text-primary-foreground">ระบบจัดการฝึกงาน</h1>
+            <h1 className="text-lg font-bold text-primary-foreground">ระบบจัดการฝึกประสบการณ์</h1>
             <p className="mt-0.5 text-xs text-primary-foreground/80">Internship Management System</p>
           </div>
 
           {/* Toggle */}
           <div className="flex border-b border-border">
             <button type="button" onClick={() => setIsSignUp(true)} className={`flex-1 py-3 text-sm font-semibold transition-colors ${isSignUp ? "border-b-2 border-primary text-primary bg-primary/5" : "text-muted-foreground hover:text-foreground"}`}>
-              สมัครสมาชิก
+              ลงทะเบียน
             </button>
             <button type="button" onClick={() => setIsSignUp(false)} className={`flex-1 py-3 text-sm font-semibold transition-colors ${!isSignUp ? "border-b-2 border-primary text-primary bg-primary/5" : "text-muted-foreground hover:text-foreground"}`}>
               เข้าสู่ระบบ
@@ -291,7 +291,7 @@ const LoginPage = () => {
             </div>
 
             <Button type="submit" disabled={loading} className="w-full h-11 text-sm font-semibold">
-              {loading ? "กำลังดำเนินการ..." : isSignUp ? "สมัครสมาชิก" : "เข้าสู่ระบบ"}
+              {loading ? "กำลังดำเนินการ..." : isSignUp ? "ลงทะเบียน" : "เข้าสู่ระบบ"}
             </Button>
 
             {/* Divider */}
@@ -312,7 +312,7 @@ const LoginPage = () => {
             )}
           </form>
         </div>
-        <p className="mt-4 text-center text-xs text-muted-foreground">© 2026 ระบบจัดการฝึกงาน — Internship Management System</p>
+        <p className="mt-4 text-center text-xs text-muted-foreground">© 2026 HU Co-op & Internship</p>
       </div>
     </div>
   );
